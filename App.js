@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, Button, SafeAreaView } from "react-native";
+import React, { useState, useEffect } from "react";
+// import { View, Text, Button, SafeAreaView } from "react-native";
 import styled from "styled-components/native";
 
 const Page = styled.SafeAreaView`
@@ -25,28 +25,104 @@ const CalcButton = styled.Button`
   margin-top: 10px;
 `;
 
+const ResultArea = styled.View`
+  width: 100%;
+  margin-top: 30px;
+  background-color: #EEE;
+  padding: 20px;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ResultItemTitle = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+`;
+
+const ResultItem = styled.Text`
+  font-size: 15px;
+  margin-bottom: 30px;
+`;
+
+const PctArea = styled.View`
+  flex-direction: row;
+  margin: 20px;
+`;
+
+const PctItem = styled.Button``;
+
 export default () => {
 
-  const [bill, setBill] = useState('');
+  const [conta, setConta] = useState('');
+  const [tip, setTip] = useState(0);
+  const [pct, setPct] = useState(10);
+  const [tot, setTot] = useState(true)
 
-  const calc = function() {
-    //
+  const calc = () => {
+    let nConta = parseFloat(conta);
+
+    if (nConta) {
+      setTip((pct / 100) * nConta);
+      setTot(true);
+    }
   }
 
 
-  return(
+  // useEffect(calc, [pct]);
+
+  useEffect(() => {
+    setTip(pct / 100 * (parseFloat(conta)))
+    setTot(false);
+  }, [pct]
+  );
+
+  useEffect(() => {
+    setTot(false);
+  }, [conta]
+  );
+
+  return (
     <Page>
       <HeaderText>Calculadora de Gorjeta</HeaderText>
-      
+
       <Input
         placeholder="Quanto deu a conta?"
         placeholderTextColor="#000"
         keyboardType="numeric"
-        value={bill}
-        onChangeText={n=>setBill(n)}
+        value={conta}
+        onChangeText={n => setConta(n)}
       />
 
-      <CalcButton title="Calcular" onPress={calc} />
+      <PctArea>
+        <PctItem title="5%" onPress={() => setPct(5)} />
+        <PctItem title="10%" onPress={() => setPct(10)} />
+        <PctItem title="15%" onPress={() => setPct(15)} />
+        <PctItem title="20%" onPress={() => setPct(20)} />
+      </PctArea>
+
+      <CalcButton title={`Calcular ${pct}%`} onPress={calc} />
+
+      {(tip > 0 && conta) &&
+        <ResultArea>
+
+          <ResultItemTitle>Valor da conta</ResultItemTitle>
+          <ResultItem>R$ {(parseFloat(conta))}</ResultItem>
+
+          <ResultItemTitle>Valor da Gorjeta</ResultItemTitle>
+          <ResultItem>R$ {tip.toFixed(2)} ({pct}%)</ResultItem>
+
+        </ResultArea>
+      }
+
+      {tot &&
+        <ResultArea>
+
+          <ResultItemTitle>Valor Total</ResultItemTitle>
+          <ResultItem>R$ {(parseFloat(conta) + tip).toFixed(2)}</ResultItem>
+
+        </ResultArea>
+      }
+
 
     </Page>
   );
